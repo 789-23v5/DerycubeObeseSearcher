@@ -2,17 +2,18 @@ const mineflayer = require('mineflayer')
 const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
+const mineflayerViewer = require('prismarine-viewer').mineflayer
 
 const bot = mineflayer.createBot({
-    host: 'play.rinaorc.com',
-    username: 'ObeseSearcher123',
-    version: '1.8.9'
+    host: 'play.derycube.fr',
+    username: 'JeanMicheal123',
+    version: '1.9.4'
 })
 
 /* VARIABLES */
-const loginCode = 'obeseSearched123';
+const loginCode = '1';
 let logged = false;
-const obesePersonToCheck = ["YukimichikaYato", "logremo", "Hallox", "shika258", "ArtemisRing", "Flyern", "Weslink", "adrien2431", "Laelia59", "Juju_02", "kingnat40", "Antadiama", "frozles", "Thebest21_", "_Arava_", "Ygroxie", "SpaD0xi", "T2F_Yarhtisay", "Akie", "Corsac", "Chamukuuy", "xdredstone2", "Dutax", "comiksdj", "Natok", "HqtShekn_n", "SoWooh", "Lieee_"]
+const obesePersonToCheck = ["BBLANCHEE", "Dutchum", "SusJoinTboy", "Diablotinn_", "Koziade", "Kayzenn_", "Ayskio", "Paulot123YT", "Mizuuge", "Lazgard", "Petitlixof_", "Cilde", "XhiteFX", "Akusito_o", "Le_mana_flux", "Kinderbueno", "Reachaurax_", "Kiyanor"]
 let obesePerson = [];
 let obeseChecked = 0;
 const milisecondeBeforeLogin = 500;
@@ -20,22 +21,7 @@ const milisecondeBeforeLogin = 500;
 const port = process.env.PORT || 5000;
 const app = express()
 
-/* LOGIN */
-bot.on('chat', (username, message) => {
-    if(message.includes("register")) {
-        const captcha = message.split(" ")[2].replaceAll("\"", "")
-        console.log("Captcha code found : " + captcha)
-        bot.chat("/register " + loginCode + " " + captcha)
-    } if (message.includes("login")) {
-        const captcha = message.split(" ")[2].replaceAll("\"", "")
-        log("Captcha code found : " + captcha)
-        setTimeout(function() {
-            bot.chat("/login " + loginCode + " " + captcha)
-            logged = true;
-            log("Successfully logged !")
-        }, milisecondeBeforeLogin)
-    }
-})
+
 
 /* LOOP CHECKER */
 function obese() {
@@ -43,7 +29,7 @@ function obese() {
         if (obeseChecked >= obesePersonToCheck.length) {
             obeseChecked = 0;
         }
-        bot.chat("/party invite " + obesePersonToCheck[obeseChecked])
+        bot.chat("/msg " + obesePersonToCheck[obeseChecked] + " 1")
         obeseChecked++;
     }
 }
@@ -52,22 +38,30 @@ setInterval(obese, 1500);
 /* LOOP RECEIVER */
 bot.on('message', jsonMsg => {
     const message = jsonMsg.getText()
+    console.log(message)
+    if(message.includes("register")) {
+        bot.chat("/r " + loginCode + " " + loginCode)
+    } if (message.includes("login")) {
+        setTimeout(function() {
+            bot.chat("/login " + loginCode)
+            logged = true;
+            log("Successfully logged !")
+        }, milisecondeBeforeLogin)
+    }
+
     const actualPerson = obesePersonToCheck[obeseChecked - 1]
     const actualPersonIndex = obesePersonToCheck.indexOf(actualPerson)
     if (logged) {
-        if (message.includes("Joueur hors-ligne")) {
+        if(message.includes("Message envoyé")){
+            if(!obesePerson.includes(actualPerson)){
+                obesePerson.push(actualPerson)
+            }
+        }
+        if (message.includes("hors ligne")) {
+            console.log(actualPerson + " not here" )
             if (obesePerson.includes(actualPerson)) {
                 obesePerson.splice(actualPersonIndex, 1)
-            }
-        }
-        if (message.includes("Joueur déjà dans un groupe")) {
-            if(!obesePerson.includes(actualPerson)) {
-                obesePerson.push(actualPerson)
-            }
-        }
-        if (message.includes("vient d'inviter")) {
-            if(!obesePerson.includes(actualPerson)) {
-                obesePerson.push(actualPerson)
+
             }
         }
     }
@@ -81,6 +75,11 @@ function log(message) {
 /* ERROR HANDLER */
 bot.on('kicked', console.log)
 bot.on('error', console.log)
+
+/* VIEWER */
+bot.once('spawn', () => {
+    mineflayerViewer(bot, { port: 3007, firstPerson: false })
+})
 
 /* API */
 app.use(bodyParser.json());
@@ -114,5 +113,6 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
     });
 }
+
 
 app.listen(port)
