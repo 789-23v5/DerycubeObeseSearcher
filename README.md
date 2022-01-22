@@ -8,6 +8,7 @@ Instructions
 download the repo
 extract it 
 do cmd on the chemin ( yes )
+do npm i and npm install prismarine-viewer
 do node server.js on the terminal 
 after you start the program 
 go to this link localhost:5000
